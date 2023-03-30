@@ -213,21 +213,21 @@ def penga(h, C, E, M):
                 t = COSTS[i - 1][j]
                 COSTS[i][j] = (t[0], t[1] + e)
 
-    costos = []
+    min_cost = int("inf")
     for cost in COSTS[len(h)][h_min:]:
         if cost[0] < cost[1]:
             c = cost[0] * C + cost[1] * E
-            costos.append(c)
+            min_cost = min(min_cost, c)
             c = (cost[1] - cost[0]) * E + cost[0] * M
-            costos.append(c)
+            min_cost = min(min_cost, c)
             c = cost[1] * M + (cost[1] - cost[0]) * C
-            costos.append(c)
+            min_cost = min(min_cost, c)
         else:
             e = cost[0] * C + cost[1] * E
-            costos.append(e)
+            min_cost = min(min_cost, e)
             e = (cost[0] - cost[1]) * C + cost[1] * M
-            costos.append(e)
+            min_cost = min(min_cost, e)
             e = cost[0] * M + (cost[0] - cost[1]) * E
-            costos.append(e)
+            min_cost = min(min_cost, e)
 
-    return min(costos), COSTS
+    return min_cost, COSTS
