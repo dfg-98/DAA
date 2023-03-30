@@ -55,17 +55,43 @@ class State:
     def __repr__(self) -> str:
         return str(self)
 
+    def traverse(self):
+        current = self
+        while current:
+            yield current
+            current = current.parent
+
 
 class BruteForceState(State):
     def get_actions(self):
         actions = []
 
         for i in range(len(self.columns)):
-            actions.append(("C", i))
-            actions.append(("E", i))
+            if self.columns[i] < self.h_max:
+                action = ("C", i)
+                new_state = self.new_state(action, 0, 0, 0)
+                for state in self.traverse():
+                    if state.columns == new_state.columns:
+                        break
+                else:
+                    actions.append(action)
+            if self.columns[i] > self.h_min:
+                action = ("E", i)
+                new_state = self.new_state(action, 0, 0, 0)
+                for state in self.traverse():
+                    if state.columns == new_state.columns:
+                        break
+                else:
+                    actions.append(action)
             for j in range(len(self.columns)):
-                if i != j:
-                    actions.append(("M", i, j))
+                if i != j and self.columns[i] > self.columns[j]:
+                    action = ("M", i, j)
+                    new_state = self.new_state(action, 0, 0, 0)
+                    for state in self.traverse():
+                        if state.columns == new_state.columns:
+                            break
+                    else:
+                        actions.append(action)
 
         return actions
 
@@ -115,20 +141,33 @@ def jenga(n, C, E, M, state_class=BruteForceState):
     min_cost = min(E_cost, C_cost, M_cost)
     final_states = []
 
-    while len(current_states):
+    states = {tuple(root.columns): root.cost}
 
+    while len(current_states):
         state = current_states.pop()
+
         if state.cost > min_cost:
             continue
-        # print(state)
+
         if state.valid():
             if state.cost <= min_cost:
                 min_cost = state.cost
             final_states.append(state)
+
         else:
             actions = state.get_actions()
             for action in actions:
                 new_state = state.new_state(action, C, E, M)
+
+                saved_state_cost = states.get(new_state.columns, None)
+                if saved_state_cost is None:
+                    states[new_state.columns] = new_state.cost
+                else:
+                    if new_state.cost < saved_state_cost:
+                        states[new_state.columns] = new_state.cost
+                    else:
+                        continue
+
                 if new_state.cost > min_cost:
                     continue
                 current_states.append(new_state)
@@ -152,3 +191,43 @@ def jenga_brute_force(n, C, E, M):
 
 def jenga_smarter(n, C, E, M):
     return jenga(n, C, E, M, SmarterState)
+
+
+def penga(h, C, E, M):
+    """
+    O(n|h_max-h_min|)
+    """
+    h_max = max(h)
+    h_min = min(h)
+
+    COSTS = [[(0, 0) for _ in range(h_max + 1)] for _ in range(len(h) + 1)]
+
+    for i in range(1, len(h) + 1):
+        for j in range(h_min, h_max + 1):
+            if j > h[i - 1]:
+                c = j - h[i - 1]
+                t = COSTS[i - 1][j]
+                COSTS[i][j] = (t[0] + c, t[1])
+            else:
+                e = h[i - 1] - j
+                t = COSTS[i - 1][j]
+                COSTS[i][j] = (t[0], t[1] + e)
+
+    costos = []
+    for cost in COSTS[len(h)][h_min:]:
+        if cost[0] < cost[1]:
+            c = cost[0] * C + cost[1] * E
+            costos.append(c)
+            c = (cost[1] - cost[0]) * E + cost[0] * M
+            costos.append(c)
+            c = cost[1] * M + (cost[1] - cost[0]) * C
+            costos.append(c)
+        else:
+            e = cost[0] * C + cost[1] * E
+            costos.append(e)
+            e = (cost[0] - cost[1]) * C + cost[1] * M
+            costos.append(e)
+            e = cost[0] * M + (cost[0] - cost[1]) * E
+            costos.append(e)
+
+    return min(costos), COSTS
