@@ -213,7 +213,7 @@ def penga(h, C, E, M):
                 t = COSTS[i - 1][j]
                 COSTS[i][j] = (t[0], t[1] + e)
 
-    min_cost = int("inf")
+    min_cost = 1000
     for cost in COSTS[len(h)][h_min:]:
         if cost[0] < cost[1]:
             c = cost[0] * C + cost[1] * E
@@ -231,3 +231,7 @@ def penga(h, C, E, M):
             min_cost = min(min_cost, e)
 
     return min_cost, COSTS
+
+a,b = penga([1,1,3], 1,2,3)
+print(a)
+print(b)

@@ -12,14 +12,12 @@ def get_random_problem():
     return tuple(columns), C, E, M
 
 
-for i in range(10000):
+for i in range(10):
     n, C, E, M = get_random_problem()
     print(f"{i+1}: {C=} {E=} {M=} n={len(n)}")
-
+   # print(n)
     # cost_brute, states_brute = jenga_brute_force(n, C, E, M)
-    cost, COSTS = penga(n, C, E, M)
-
-    print(cost)
+    #cost, COSTS = penga(n, C, E, M)
 
     # if cost_brute == cost_smart:
     #     print("Succed. Cost: ", cost_brute)
