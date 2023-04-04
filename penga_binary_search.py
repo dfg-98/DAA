@@ -2,7 +2,7 @@ def penga_binary(h, C, E, M):
     """
     O(n log(|h_max-h_min|))
     """
-    low = 0
+    low = min(h)
     top = max(h)
     
 
