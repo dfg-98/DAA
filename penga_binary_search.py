@@ -1,18 +1,24 @@
-def penga(h, C, E, M):
+def penga_binary(h, C, E, M):
     """
     O(n log(|h_max-h_min|))
     """
     low = 0
     top = max(h)
+    
 
     while top - low > 1:
         mid = (top + low) // 2
         mid_cost = penga_goal(h, C, E, M, mid)
         next_cost = penga_goal(h, C, E, M, mid + 1)
-        if mid_cost >= next_cost:
+        if mid_cost > next_cost:
             low = mid
         else:
             top = mid
+    
+    if top - low == 1:
+        top_cost = penga_goal(h, C, E, M, top)
+        low_cost = penga_goal(h, C, E, M, low)
+        return min(top_cost, low_cost)
 
     return penga_goal(h, C, E, M, top)
 
@@ -46,10 +52,3 @@ def penga_goal(h, C, E, M, goal):
 
     return min_cost
 
-
-h = [3, 2, 1]
-C = 1
-E = 10
-M = 8
-c = penga(h, C, E, M)
-print(c)
